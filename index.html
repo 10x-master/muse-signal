@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="ko" data-theme="day">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>온디바이스 스마트 악보 뷰어</title>
+  <link rel="stylesheet" href="style.css">
+  <!-- OpenSheetMusicDisplay (OSMD) CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/opensheetmusicdisplay@1.8.8/build/opensheetmusicdisplay.min.js"></script>
+  <!-- Mozilla PDF.js CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <!-- QRCode.js CDN (Client-side QR generation) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <!-- HTML5-QRCode CDN (Camera/Image QR Scanner) -->
+  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+</head>
+<body>
+  <div id="app">
+    <!-- Top Tablet Toolbar -->
+    <header class="viewer-header">
+      <div class="header-left">
+        <div class="header-title-group">
+          <span class="app-badge">On-Device Sheet Core</span>
+          <h1 class="piece-title" id="piece-title">W. A. Mozart - Horn Concerto No. 4, K. 495</h1>
+        </div>
+
+        <!-- Mode Toggle Tabs -->
+        <nav class="mode-tabs" aria-label="악보 모드 선택">
+          <button id="tab-musicxml" class="tab-btn active" type="button">
+            <span class="tab-icon">🎵</span> 스마트 MusicXML
+          </button>
+          <button id="tab-pdf" class="tab-btn" type="button">
+            <span class="tab-icon">📄</span> 일반 PDF
+          </button>
+        </nav>
+      </div>
+
+      <div class="toolbar-controls">
+        <!-- MusicXML Playback Controls -->
+        <div class="mode-control-group" id="musicxml-controls">
+          <div class="playback-controls">
+            <button id="prev-measure-btn" class="ctrl-btn" type="button" title="이전 마디 (점프)">
+              <span class="btn-icon">⏮</span>
+            </button>
+            <button id="play-pause-btn" class="ctrl-btn primary" type="button" title="재생 / 일시정지">
+              <span class="btn-icon" id="play-icon">▶</span>
+              <span id="play-label">재생</span>
+            </button>
+            <button id="next-measure-btn" class="ctrl-btn" type="button" title="다음 마디 (점프)">
+              <span class="btn-icon">⏭</span>
+            </button>
+          </div>
+
+          <div class="info-group">
+            <span class="status-pill" id="measure-pill">마디 1 / -</span>
+            <span class="status-pill" id="tempo-pill">80 BPM</span>
+          </div>
+        </div>
+
+        <!-- PDF Mode Controls (Hidden by default) -->
+        <div class="mode-control-group hidden" id="pdf-controls">
+          <label for="pdf-file-input" class="ctrl-btn upload-btn" title="PDF 악보 파일 열기">
+            <span class="btn-icon">📂</span>
+            <span>PDF 열기</span>
+          </label>
+          <input type="file" id="pdf-file-input" accept=".pdf" style="display:none;">
+
+          <button id="load-sample-pdf-btn" class="ctrl-btn" type="button" title="기본 샘플 악보 열기">
+            <span>샘플 PDF</span>
+          </button>
+
+          <div class="playback-controls">
+            <button id="pdf-prev-btn" class="ctrl-btn" type="button" title="이전 페이지">
+              <span class="btn-icon">◀</span>
+            </button>
+            <button id="pdf-next-btn" class="ctrl-btn" type="button" title="다음 페이지">
+              <span class="btn-icon">▶</span>
+            </button>
+          </div>
+
+          <span class="status-pill" id="pdf-page-pill">1 / 1 페이지</span>
+        </div>
+
+        <!-- License Status Badge -->
+        <div class="license-status-group" id="license-header-group">
+          <span class="status-pill license-badge" id="license-pill">인증 확인 중</span>
+          <button id="open-prof-header-btn" class="ctrl-btn sm-btn" type="button" title="교수자 라이선스 발급기 열기">
+            <span>👨‍🏫 교수자 키</span>
+          </button>
+        </div>
+
+        <button id="theme-toggle-btn" class="theme-toggle-btn" type="button" aria-label="테마 전환">
+          <span class="theme-icon" id="theme-icon">☀️</span>
+          <span id="theme-label">데이 모드</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- ====================================================================
+         [Step 1 & Step 3] 학생: 라이선스 미인증 기기 잠금 오버레이 화면
+         ==================================================================== -->
+    <div id="license-gate-screen" class="license-gate-screen">
+      <div class="license-gate-card">
+        <div class="lock-header">
+          <div class="lock-pill-badge">
+            <span class="lock-icon">🔒</span>
+            <span>라이선스 미인증 기기</span>
+          </div>
+          <h2 class="lock-title">스마트 악보 뷰어 기기 승인 필요</h2>
+          <p class="lock-subtitle">
+            이 태블릿은 아직 담당 교수자의 라이선스 인증이 완료되지 않았습니다.<br>
+            아래 <strong>기기 QR코드</strong>를 교수자에게 제시하거나, 화면을 캡처해 전송하세요.
+          </p>
+        </div>
+
+        <!-- Step 1. 기기 UUID 및 기기 QR코드 -->
+        <div class="device-qr-section">
+          <div class="qr-canvas-wrapper">
+            <div id="student-device-qr" class="qr-box"></div>
+            <span class="qr-hint">학생 기기 식별 QR (Android ID / UUID)</span>
+          </div>
+
+          <div class="uuid-info-card">
+            <span class="uuid-title">태블릿 고유 식별값 (UUID)</span>
+            <div class="uuid-copy-row">
+              <code id="student-device-uuid" class="uuid-text">생성 중...</code>
+              <button id="copy-uuid-btn" class="ctrl-btn sm-btn" type="button" title="UUID 복사">복사</button>
+            </div>
+            <p class="uuid-guide">
+              비대면 레슨 시: 위 UUID 또는 QR 화면을 캡처하여 교수자에게 카톡으로 전송하세요.
+            </p>
+          </div>
+        </div>
+
+        <!-- Step 3. 승인 키 적용 섹션 (비대면 6자리 코드 vs 대면 QR 스캔) -->
+        <div class="approval-input-section">
+          <div class="approval-tabs">
+            <button id="tab-act-code" class="approval-tab-btn active" type="button">
+              ✉️ 비대면 (6자리 승인 코드)
+            </button>
+            <button id="tab-act-qr" class="approval-tab-btn" type="button">
+              📷 대면 (승인 QR 스캔 / 토큰)
+            </button>
+          </div>
+
+          <!-- 비대면 6자리 핀코드 입력창 -->
+          <div id="panel-act-code" class="approval-tab-panel active">
+            <label for="license-pin-input" class="input-label">교수자가 카톡으로 전달한 6자리 승인 핀코드:</label>
+            <div class="pin-submit-row">
+              <input type="text" id="license-pin-input" class="pin-text-input" maxlength="6" placeholder="예: 849201" inputmode="numeric" autocomplete="off">
+              <button id="submit-pin-btn" class="ctrl-btn primary" type="button">
+                🔓 인증 및 잠금 해제
+              </button>
+            </div>
+            <span class="input-subnote">* 교수자의 마스터 개인키로 암호화 검증됩니다.</span>
+          </div>
+
+          <!-- 대면 QR 스캔 및 토큰 입력창 -->
+          <div id="panel-act-qr" class="approval-tab-panel hidden">
+            <label class="input-label">교수자의 승인 QR을 카메라로 비추거나 토큰을 입력하세요:</label>
+            <div class="qr-scan-wrapper">
+              <div id="qr-reader" class="camera-preview-box"></div>
+              <button id="start-qr-scan-btn" class="ctrl-btn" type="button">📷 카메라 스캐너 시작</button>
+            </div>
+            <div class="token-submit-row">
+              <input type="text" id="license-qr-token-input" class="token-input" placeholder="또는 승인 JSON 토큰 붙여넣기">
+              <button id="submit-qr-token-btn" class="ctrl-btn primary" type="button">
+                승인 토큰 적용
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 교수자 모드 전환 링크 (테스트 및 발급용) -->
+        <div class="gate-footer">
+          <span>레슨 담당 교수자이신가요?</span>
+          <button id="open-prof-gate-btn" class="text-link-button" type="button">
+            👨‍🏫 교수자 승인 키 발급기 열기
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ====================================================================
+         [Step 2] 교수: 승인 키 발급 (교수자용 마스터 키 패널)
+         ==================================================================== -->
+    <div id="professor-modal" class="app-modal hidden" role="dialog" aria-modal="true">
+      <div class="modal-card professor-modal-card">
+        <div class="modal-header">
+          <span class="modal-icon">👨‍🏫</span>
+          <h3 class="modal-title">교수자용 마스터 라이선스 발급기</h3>
+          <button id="close-prof-modal-btn" class="modal-close" type="button">✕</button>
+        </div>
+        <div class="modal-body prof-modal-body">
+          <p class="prof-intro">
+            학생의 기기 고유 UUID를 기반으로 <strong>RSA-256 서명된 오프라인 라이선스 키</strong>를 생성합니다.
+          </p>
+
+          <div class="prof-form-group">
+            <label class="prof-label">학생 기기 UUID</label>
+            <div class="input-action-row">
+              <input type="text" id="prof-target-uuid" class="prof-input" placeholder="학생 태블릿의 UUID 입력">
+              <button id="prof-auto-fill-uuid-btn" class="ctrl-btn sm-btn" type="button">현재 기기 UUID 채우기</button>
+            </div>
+          </div>
+
+          <div class="prof-form-row">
+            <div class="prof-form-group">
+              <label class="prof-label">학생 성명</label>
+              <input type="text" id="prof-student-name" class="prof-input" value="홍길동">
+            </div>
+            <div class="prof-form-group">
+              <label class="prof-label">유효 기간 (만료일)</label>
+              <input type="date" id="prof-expire-date" class="prof-input" value="2027-10-28">
+            </div>
+          </div>
+
+          <button id="prof-generate-key-btn" class="ctrl-btn primary full-width" type="button">
+            🔑 RSA-256 마스터 키로 라이선스 승인 발급
+          </button>
+
+          <!-- 승인 발급 결과 영역 -->
+          <div id="prof-result-section" class="prof-result-section hidden">
+            <div class="result-badge-row">
+              <span class="success-badge">✅ 승인 키 발급 완료 (RSA-256 서명됨)</span>
+            </div>
+
+            <!-- 비대면용 6자리 핀코드 -->
+            <div class="result-card pin-card">
+              <div class="result-card-header">
+                <span class="card-tag">비대면 전송용</span>
+                <span class="card-title">6자리 승인 핀코드</span>
+              </div>
+              <div class="pin-display-row">
+                <span class="pin-large-code" id="prof-generated-pin">------</span>
+                <button id="prof-copy-pin-btn" class="ctrl-btn sm-btn" type="button">핀코드 복사</button>
+              </div>
+              <p class="pin-hint">카톡으로 학생에게 위 6자리 번호를 보내주면 즉시 입력하여 잠금 해제할 수 있습니다.</p>
+            </div>
+
+            <!-- 대면 스캔용 승인 QR코드 -->
+            <div class="result-card qr-card">
+              <div class="result-card-header">
+                <span class="card-tag">대면 레슨용</span>
+                <span class="card-title">승인 QR코드</span>
+              </div>
+              <div class="prof-qr-wrapper">
+                <div id="prof-approved-qr" class="prof-qr-box"></div>
+              </div>
+              <p class="pin-hint">학생 태블릿 카메라로 위 QR코드를 비추면 즉시 승인됩니다.</p>
+            </div>
+
+            <!-- 전체 암호화 토큰 텍스트 -->
+            <div class="result-card token-card">
+              <div class="result-card-header">
+                <span class="card-title">전체 암호화 서명 토큰</span>
+                <button id="prof-copy-token-btn" class="ctrl-btn sm-btn" type="button">토큰 복사</button>
+              </div>
+              <textarea id="prof-generated-token" class="token-textarea" readonly></textarea>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Practice Monitoring & Audio VAD Bar -->
+    <section class="practice-monitor-bar" id="practice-monitor-bar">
+      <div class="monitor-left">
+        <!-- Mic VAD Toggle Button -->
+        <button id="mic-toggle-btn" class="ctrl-btn monitor-btn" type="button" title="소리 감지 연습 타이머 시작">
+          <span class="btn-icon" id="mic-icon">🎙️</span>
+          <span id="mic-label">감지 시작</span>
+        </button>
+
+        <!-- Real-time Sound Activity LED & Meter -->
+        <div class="vad-meter-group" title="실시간 소리 감지 레벨">
+          <div class="vad-led" id="vad-led"></div>
+          <div class="vad-meter-track">
+            <div class="vad-meter-fill" id="vad-meter-fill"></div>
+          </div>
+          <span class="vad-status-text" id="vad-status-text">대기 중</span>
+        </div>
+
+        <!-- Pure Practice Time Counter -->
+        <div class="timer-display">
+          <span class="timer-label">순수 연습</span>
+          <span class="timer-digits" id="practice-timer">00:00:00</span>
+        </div>
+      </div>
+
+      <div class="monitor-right">
+        <!-- Save Practice Session Button -->
+        <button id="end-session-btn" class="ctrl-btn success-btn" type="button" title="현재 연습 세션 저장">
+          <span>💾 세션 저장</span>
+        </button>
+
+        <!-- Cloud Sync & Offline Status -->
+        <button id="sync-trigger-btn" class="ctrl-btn sync-btn" type="button" title="구글 드라이브 동기화 큐">
+          <span class="sync-icon" id="sync-icon">☁️</span>
+          <span id="sync-status-text">온라인</span>
+          <span class="sync-badge" id="unsynced-count-badge" title="미동기화 세션 수">0</span>
+        </button>
+
+        <!-- Notification Simulation Controls -->
+        <div class="notify-btn-group">
+          <button id="test-notify-8pm" class="ctrl-btn notify-btn" type="button" title="오후 8시 연습 알림 시뮬레이션">
+            🔔 8시 알림
+          </button>
+          <button id="test-notify-10pm" class="ctrl-btn notify-btn" type="button" title="오후 10시 연습 알림 시뮬레이션">
+            🔔 10시 알림
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- In-App Notification / Dialog Modal -->
+    <div id="app-modal" class="app-modal hidden" role="dialog" aria-modal="true">
+      <div class="modal-card">
+        <div class="modal-header">
+          <span class="modal-icon" id="modal-icon">🔔</span>
+          <h3 class="modal-title" id="modal-title">스마트 연습 알림</h3>
+          <button id="modal-close-btn" class="modal-close" type="button">✕</button>
+        </div>
+        <div class="modal-body" id="modal-body">
+          알림 내용
+        </div>
+        <div class="modal-footer">
+          <button id="modal-confirm-btn" class="ctrl-btn primary" type="button">확인</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 35% Golden Eye-Level Guide Line -->
+    <div class="golden-guide-line" id="golden-guide-line" aria-hidden="true">
+      <div class="guide-indicator-badge">35% EYE LEVEL</div>
+    </div>
+
+    <!-- Score Viewport -->
+    <main class="viewer-viewport" id="viewer-viewport">
+      <!-- MusicXML Mode Container -->
+      <div class="score-wrapper" id="score-wrapper">
+        <div id="score-container">
+          <div class="loading-box" id="loading-indicator">
+            <div class="spinner"></div>
+            <span>악보 로딩 및 SVG 렌더링 중...</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- PDF Mode Container (3-Page Window Virtual Rendering) -->
+      <div class="pdf-viewer-wrapper hidden" id="pdf-viewer-wrapper">
+        <div id="pdf-container" class="pdf-container">
+          <!-- Dynamic 3-Page Window Virtual DOM slots will be inserted here -->
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="main.js"></script>
+</body>
+</html>
