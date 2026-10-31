@@ -151,6 +151,7 @@
   const panelActQr = document.getElementById('panel-act-qr');
   const licensePinInput = document.getElementById('license-pin-input');
   const submitPinBtn = document.getElementById('submit-pin-btn');
+  const quickDemoUnlockBtn = document.getElementById('quick-demo-unlock-btn');
   const licenseQrTokenInput = document.getElementById('license-qr-token-input');
   const submitQrTokenBtn = document.getElementById('submit-qr-token-btn');
   const startQrScanBtn = document.getElementById('start-qr-scan-btn');
@@ -1323,6 +1324,22 @@
     if (licensePinInput) {
       licensePinInput.addEventListener('keydown', (e) => {
         if (e.key === 'Enter') handlePinCodeSubmit();
+      });
+    }
+
+    // [Step 3] 1초 만에 테스트용 즉시 핀코드 자동 입력 및 잠금 해제
+    if (quickDemoUnlockBtn) {
+      quickDemoUnlockBtn.addEventListener('click', async () => {
+        const defaultExpire = '2027-10-28';
+        const expectedPin = await computeLicensePinCode(deviceUUID, defaultExpire);
+        if (licensePinInput) {
+          licensePinInput.value = expectedPin;
+        }
+        await applyAndStoreLicense({
+          uuid: deviceUUID,
+          studentName: '체험 학생',
+          expireDate: defaultExpire
+        });
       });
     }
 
