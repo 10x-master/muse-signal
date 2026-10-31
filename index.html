@@ -117,18 +117,45 @@
         <div class="device-qr-section">
           <div class="qr-canvas-wrapper">
             <div id="student-device-qr" class="qr-box"></div>
-            <span class="qr-hint">학생 기기 식별 QR (Android ID / UUID)</span>
+            <span class="qr-hint">📱 내 태블릿 고유 QR</span>
           </div>
 
-          <div class="uuid-info-card">
-            <span class="uuid-title">태블릿 고유 식별값 (UUID)</span>
-            <div class="uuid-copy-row">
-              <code id="student-device-uuid" class="uuid-text">생성 중...</code>
-              <button id="copy-uuid-btn" class="ctrl-btn sm-btn" type="button" title="UUID 복사">복사</button>
+          <!-- QR창 오른쪽: 직관적이고 쉬운 사용설명서 카드 -->
+          <div class="qr-guide-card">
+            <div class="guide-header">
+              <span class="guide-badge">💡 초간단 3단계 인증 방법</span>
             </div>
-            <p class="uuid-guide">
-              비대면 레슨 시: 위 UUID 또는 QR 화면을 캡처하여 교수자에게 카톡으로 전송하세요.
-            </p>
+
+            <ol class="step-guide-list">
+              <li class="step-item">
+                <span class="step-num">1</span>
+                <div class="step-text">
+                  <strong>선생님께 화면 보여주기 (또는 캡처 전송)</strong>
+                  <p>• <strong>대면 레슨:</strong> 왼쪽 QR코드를 선생님 스마트폰 카메라로 비춰주세요.</p>
+                  <p>• <strong>비대면(카톡):</strong> 이 화면을 <strong>캡처</strong>하거나 아래 기기 코드를 복사해서 카톡으로 보내주세요.</p>
+                </div>
+              </li>
+              <li class="step-item">
+                <span class="step-num">2</span>
+                <div class="step-text">
+                  <strong>선생님이 발급한 6자리 승인번호 받기</strong>
+                  <p>선생님이 QR을 확인 후 카톡으로 <strong>[6자리 승인 핀코드]</strong>를 보내주십니다.</p>
+                </div>
+              </li>
+              <li class="step-item">
+                <span class="step-num">3</span>
+                <div class="step-text">
+                  <strong>아래 입력창에 6자리 입력 후 잠금 해제!</strong>
+                  <p>한 번만 인증하면 인터넷이 없는 곳에서도 평생 무료로 악보를 볼 수 있습니다.</p>
+                </div>
+              </li>
+            </ol>
+
+            <div class="uuid-compact-row">
+              <span class="uuid-label">기기 고유코드:</span>
+              <code id="student-device-uuid" class="uuid-text">생성 중...</code>
+              <button id="copy-uuid-btn" class="ctrl-btn sm-btn" type="button" title="기기 코드 복사">코드 복사</button>
+            </div>
           </div>
         </div>
 
