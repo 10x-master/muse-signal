@@ -76,27 +76,31 @@ html, body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0.6rem 1.5rem;
+  padding: 0.6rem 1.25rem;
   background-color: var(--toolbar-bg);
   border-bottom: 1px solid var(--toolbar-border);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   box-shadow: 0 4px 16px var(--shadow-color);
   transition: background-color 0.25s ease, border-color 0.25s ease;
-  gap: 1rem;
+  gap: 0.75rem;
+  flex-wrap: wrap;
 }
 
 .header-left {
   display: flex;
   align-items: center;
-  gap: 1.5rem;
+  gap: 1rem;
   flex-wrap: wrap;
+  min-width: 0;
+  flex: 1 1 auto;
 }
 
 .header-title-group {
   display: flex;
   flex-direction: column;
   gap: 2px;
+  min-width: 0;
 }
 
 .app-badge {
@@ -112,6 +116,9 @@ html, body {
   font-weight: 600;
   color: var(--text-primary);
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
 }
 
 /* Mode Toggle Tabs */
@@ -1316,4 +1323,309 @@ html, body {
   background: rgba(16, 185, 129, 0.15);
   color: #10B981;
   border-color: rgba(16, 185, 129, 0.4);
+}
+
+/* ==========================================================================
+   Comprehensive Responsive System: Mobile (< 680px), Tablet (680-1024px), PC (> 1024px)
+   ========================================================================== */
+
+/* 1. Mobile Phone (< 680px) */
+@media screen and (max-width: 680px) {
+  html, body {
+    font-size: 14px;
+    overflow-x: hidden;
+    width: 100vw;
+  }
+
+  /* Header Optimization */
+  .viewer-header {
+    padding: 0.5rem 0.65rem;
+    gap: 0.45rem;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .header-left {
+    justify-content: space-between;
+    width: 100%;
+    gap: 0.5rem;
+  }
+
+  .header-title-group {
+    max-width: 60%;
+  }
+
+  .piece-title {
+    font-size: 0.88rem;
+    max-width: 180px;
+  }
+
+  .mode-tabs {
+    padding: 2px;
+  }
+
+  .tab-btn {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.74rem;
+  }
+
+  .toolbar-controls {
+    width: 100%;
+    justify-content: space-between;
+    gap: 0.4rem;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-bottom: 2px;
+  }
+
+  .mode-control-group {
+    gap: 0.35rem;
+  }
+
+  .playback-controls {
+    gap: 0.25rem;
+  }
+
+  .ctrl-btn {
+    min-width: 34px;
+    height: 34px;
+    padding: 0 0.5rem;
+    font-size: 0.78rem;
+    border-radius: 6px;
+  }
+
+  .theme-toggle-btn {
+    min-height: 34px;
+    padding: 0.3rem 0.65rem;
+    font-size: 0.78rem;
+  }
+
+  .theme-toggle-btn #theme-label {
+    display: none; /* 폰에서는 아이콘만 표시하여 가로 공간 확보 */
+  }
+
+  .license-badge {
+    max-width: 100px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .info-group {
+    display: none; /* 폰 헤더에서는 80BPM/마디 번호는 컴팩트화 */
+  }
+
+  /* Practice Monitor Bar Optimization */
+  .practice-monitor-bar {
+    padding: 0.4rem 0.65rem;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.45rem;
+  }
+
+  .monitor-left {
+    width: 100%;
+    justify-content: space-between;
+    gap: 0.4rem;
+  }
+
+  .monitor-right {
+    width: 100%;
+    justify-content: space-between;
+    gap: 0.4rem;
+  }
+
+  .notify-btn-group {
+    display: none; /* 폰에서는 시뮬레이션 버튼 숨겨서 실제 연주 공간 극대화 */
+  }
+
+  .vad-meter-track {
+    width: 36px;
+  }
+
+  .timer-digits {
+    font-size: 0.95rem;
+  }
+
+  .timer-display {
+    padding: 0.25rem 0.5rem;
+  }
+
+  /* License Gate Screen Optimization */
+  .license-gate-screen {
+    padding: 0.65rem;
+    align-items: flex-start;
+  }
+
+  .license-gate-card {
+    padding: 1.25rem 0.85rem;
+    border-radius: 14px;
+    gap: 1rem;
+    width: 100%;
+    margin-top: 0.5rem;
+    margin-bottom: 2rem;
+  }
+
+  .lock-title {
+    font-size: 1.15rem;
+  }
+
+  .lock-subtitle {
+    font-size: 0.8rem;
+  }
+
+  .device-qr-section {
+    flex-direction: column;
+    align-items: center;
+    padding: 0.9rem 0.65rem;
+    gap: 1rem;
+  }
+
+  .qr-box {
+    width: 130px;
+    height: 130px;
+  }
+
+  .qr-guide-card {
+    min-width: unset;
+    width: 100%;
+  }
+
+  .step-item {
+    padding: 0.45rem 0.6rem;
+    gap: 0.5rem;
+  }
+
+  .step-num {
+    width: 19px;
+    height: 19px;
+    font-size: 0.7rem;
+  }
+
+  .step-text strong {
+    font-size: 0.8rem;
+  }
+
+  .step-text p {
+    font-size: 0.72rem;
+  }
+
+  .uuid-compact-row {
+    flex-wrap: wrap;
+    padding: 0.35rem 0.5rem;
+  }
+
+  .uuid-text {
+    width: 100%;
+    margin: 2px 0;
+  }
+
+  .approval-tabs {
+    flex-direction: column;
+    gap: 0.35rem;
+  }
+
+  .approval-tab-btn {
+    padding: 0.45rem;
+    font-size: 0.8rem;
+  }
+
+  .pin-text-input {
+    height: 42px;
+    font-size: 1.35rem;
+    letter-spacing: 0.15em;
+  }
+
+  .pin-submit-row {
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+
+  .pin-submit-row .ctrl-btn {
+    width: 100%;
+    height: 42px;
+  }
+
+  /* Score Viewport & Golden Guide Line */
+  .golden-guide-line {
+    top: 28vh;
+  }
+
+  .score-wrapper {
+    padding-top: 28vh;
+    padding-bottom: 50vh;
+    padding-left: 0.35rem;
+    padding-right: 0.35rem;
+  }
+
+  .pdf-viewer-wrapper {
+    padding-top: 28vh;
+    padding-bottom: 50vh;
+    padding-left: 0.25rem;
+    padding-right: 0.25rem;
+  }
+
+  /* Modals */
+  .modal-card {
+    padding: 1.15rem 0.9rem;
+    width: 95%;
+  }
+}
+
+/* 2. Tablet Screen (681px - 1024px) */
+@media screen and (min-width: 681px) and (max-width: 1024px) {
+  .viewer-header {
+    padding: 0.6rem 1rem;
+    gap: 0.75rem;
+  }
+
+  .header-left {
+    gap: 1rem;
+  }
+
+  .piece-title {
+    max-width: 280px;
+  }
+
+  .score-wrapper {
+    max-width: 96vw;
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  .device-qr-section {
+    flex-direction: row;
+    align-items: flex-start;
+  }
+
+  .qr-box {
+    width: 140px;
+    height: 140px;
+  }
+
+  .license-gate-card {
+    max-width: 580px;
+    padding: 1.6rem;
+  }
+}
+
+/* 3. PC Desktop (> 1024px) */
+@media screen and (min-width: 1025px) {
+  .viewer-header {
+    padding: 0.65rem 1.75rem;
+  }
+
+  .piece-title {
+    font-size: 1.05rem;
+    max-width: 450px;
+  }
+
+  .score-wrapper {
+    max-width: 1050px;
+  }
+
+  .license-gate-card {
+    max-width: 640px;
+    padding: 2rem;
+  }
 }
