@@ -1502,7 +1502,7 @@
       }
     });
 
-    // 화면 리사이즈
+    // 화면 리사이즈 (폰 화면 회전 / 창 크기 변경 시 악보 좌표 재계산 및 정렬)
     let resizeTimer = null;
     window.addEventListener('resize', () => {
       clearTimeout(resizeTimer);
@@ -1511,6 +1511,13 @@
           try {
             osmd.render();
             measureCoordinates = extractMeasureYPositions();
+            if (measureCoordinates[currentMeasureIndex]) {
+              targetScrollY = measureCoordinates[currentMeasureIndex].pixelY;
+              currentScrollY = targetScrollY;
+              if (scoreWrapper) {
+                scoreWrapper.style.transform = `translate3d(0, ${-currentScrollY.toFixed(2)}px, 0)`;
+              }
+            }
           } catch (e) {
             console.warn('리사이즈 렌더 실패:', e);
           }

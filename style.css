@@ -20,6 +20,7 @@
   --btn-active: #D5CEC2;
   --accent-color: #C07D2B;
   --shadow-color: rgba(0, 0, 0, 0.08);
+  --golden-guide-top: 35vh;
 }
 
 [data-theme="night"] {
@@ -37,6 +38,7 @@
   --btn-active: #444444;
   --accent-color: #E6A756;
   --shadow-color: rgba(0, 0, 0, 0.45);
+  --golden-guide-top: 35vh;
 }
 
 * {
@@ -55,6 +57,13 @@ html, body {
   font-family: -apple-system, BlinkMacSystemFont, "Pretendard", "Noto Sans KR", "Segoe UI", Roboto, sans-serif;
   transition: background-color 0.25s ease, color 0.25s ease;
   user-select: none;
+}
+
+.tab-text-short {
+  display: none;
+}
+.tab-text-full {
+  display: inline;
 }
 
 /* ==========================================================================
@@ -532,7 +541,7 @@ html, body {
 
 .golden-guide-line {
   position: fixed;
-  top: 35vh;
+  top: var(--golden-guide-top);
   left: 0;
   width: 100%;
   height: 0;
@@ -544,7 +553,7 @@ html, body {
   align-items: center;
   padding-right: 1.5rem;
   box-shadow: 0 0 10px rgba(230, 167, 86, 0.25);
-  transition: border-color 0.25s ease;
+  transition: border-color 0.25s ease, top 0.25s ease;
 }
 
 [data-theme="day"] .golden-guide-line {
@@ -592,14 +601,15 @@ html, body {
   position: relative;
   will-change: transform;
   transform: translate3d(0, 0, 0);
-  /* 35% 골든 라인에 첫 마디 상단이 정확히 오도록 상단 패딩 제공 */
-  padding-top: 35vh;
+  /* 골든 라인에 첫 마디 상단이 정확히 오도록 상단 패딩 동기화 */
+  padding-top: var(--golden-guide-top);
   padding-bottom: 65vh;
   padding-left: 1.5rem;
   padding-right: 1.5rem;
   display: flex;
   justify-content: center;
   align-items: flex-start;
+  transition: padding-top 0.25s ease;
 }
 
 /* ==========================================================================
@@ -613,10 +623,11 @@ html, body {
   position: relative;
   will-change: transform;
   transform: translate3d(0, 0, 0);
-  padding-top: 35vh;
+  padding-top: var(--golden-guide-top);
   padding-bottom: 65vh;
   padding-left: 1rem;
   padding-right: 1rem;
+  transition: padding-top 0.25s ease;
 }
 
 .pdf-container {
@@ -774,10 +785,11 @@ html, body {
   z-index: 999;
   background-color: var(--bg-color);
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
-  padding: 1.5rem;
+  padding: 1.5rem 1rem 3rem;
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   transition: opacity 0.3s ease, visibility 0.3s ease;
@@ -791,6 +803,7 @@ html, body {
 }
 
 .license-gate-card {
+  margin: auto 0;
   width: 100%;
   max-width: 620px;
   background: var(--card-bg);
@@ -1326,60 +1339,92 @@ html, body {
 }
 
 /* ==========================================================================
-   Comprehensive Responsive System: Mobile (< 680px), Tablet (680-1024px), PC (> 1024px)
+   Comprehensive Responsive System: Mobile (< 680px), Mobile Landscape, Tablet (680-1024px), PC (> 1024px)
    ========================================================================== */
 
 /* 1. Mobile Phone (< 680px) */
 @media screen and (max-width: 680px) {
+  :root {
+    --golden-guide-top: clamp(135px, 26vh, 190px);
+  }
+
   html, body {
-    font-size: 14px;
+    font-size: 13.5px;
     overflow-x: hidden;
-    width: 100vw;
+    width: 100%;
+  }
+
+  /* Responsive Tab Text: Short Labels */
+  .tab-text-short {
+    display: inline;
+  }
+  .tab-text-full {
+    display: none;
   }
 
   /* Header Optimization */
   .viewer-header {
-    padding: 0.5rem 0.65rem;
-    gap: 0.45rem;
+    padding: 0.45rem 0.65rem;
+    gap: 0.4rem;
     flex-direction: column;
     align-items: stretch;
   }
 
   .header-left {
+    display: flex;
     justify-content: space-between;
+    align-items: center;
     width: 100%;
-    gap: 0.5rem;
+    gap: 0.4rem;
+    flex-wrap: nowrap;
   }
 
   .header-title-group {
-    max-width: 60%;
+    flex: 1 1 auto;
+    min-width: 0;
+    max-width: 58%;
+  }
+
+  .app-badge {
+    font-size: 0.62rem;
+    letter-spacing: 0.04em;
   }
 
   .piece-title {
-    font-size: 0.88rem;
-    max-width: 180px;
+    font-size: 0.85rem;
+    max-width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .mode-tabs {
     padding: 2px;
+    gap: 2px;
+    flex-shrink: 0;
   }
 
   .tab-btn {
-    padding: 0.25rem 0.5rem;
-    font-size: 0.74rem;
+    padding: 0.25rem 0.45rem;
+    font-size: 0.72rem;
+    gap: 0.2rem;
   }
 
   .toolbar-controls {
+    display: flex;
     width: 100%;
     justify-content: space-between;
-    gap: 0.4rem;
+    align-items: center;
+    gap: 0.35rem;
     flex-wrap: nowrap;
-    overflow-x: auto;
-    padding-bottom: 2px;
+    overflow-x: visible;
   }
 
   .mode-control-group {
+    display: flex;
+    align-items: center;
     gap: 0.35rem;
+    flex-shrink: 0;
   }
 
   .playback-controls {
@@ -1387,73 +1432,137 @@ html, body {
   }
 
   .ctrl-btn {
-    min-width: 34px;
-    height: 34px;
-    padding: 0 0.5rem;
-    font-size: 0.78rem;
+    min-width: 32px;
+    height: 32px;
+    padding: 0 0.45rem;
+    font-size: 0.75rem;
     border-radius: 6px;
   }
 
+  .upload-btn {
+    padding: 0 0.45rem;
+  }
+
   .theme-toggle-btn {
-    min-height: 34px;
-    padding: 0.3rem 0.65rem;
-    font-size: 0.78rem;
+    min-height: 32px;
+    height: 32px;
+    padding: 0 0.5rem;
+    font-size: 0.75rem;
+    flex-shrink: 0;
   }
 
   .theme-toggle-btn #theme-label {
-    display: none; /* 폰에서는 아이콘만 표시하여 가로 공간 확보 */
+    display: none;
+  }
+
+  .license-status-group {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    flex-shrink: 0;
   }
 
   .license-badge {
-    max-width: 100px;
+    max-width: 78px;
+    padding: 0.2rem 0.4rem;
+    font-size: 0.7rem;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
   }
 
   .info-group {
-    display: none; /* 폰 헤더에서는 80BPM/마디 번호는 컴팩트화 */
+    display: none;
   }
 
-  /* Practice Monitor Bar Optimization */
+  /* Single Sleek Row Practice Monitor Bar */
   .practice-monitor-bar {
-    padding: 0.4rem 0.65rem;
-    flex-direction: column;
-    align-items: stretch;
-    gap: 0.45rem;
+    padding: 0.3rem 0.65rem;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.4rem;
+    min-height: 38px;
   }
 
   .monitor-left {
-    width: 100%;
-    justify-content: space-between;
+    display: flex;
+    align-items: center;
     gap: 0.4rem;
+    flex: 1 1 auto;
+    min-width: 0;
   }
 
-  .monitor-right {
-    width: 100%;
-    justify-content: space-between;
-    gap: 0.4rem;
+  .monitor-btn {
+    height: 30px;
+    padding: 0 0.45rem;
+    font-size: 0.74rem;
+    flex-shrink: 0;
   }
 
-  .notify-btn-group {
-    display: none; /* 폰에서는 시뮬레이션 버튼 숨겨서 실제 연주 공간 극대화 */
+  .vad-meter-group {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+  }
+
+  .vad-status-text {
+    display: none;
   }
 
   .vad-meter-track {
-    width: 36px;
+    width: 28px;
+    height: 5px;
   }
 
-  .timer-digits {
-    font-size: 0.95rem;
+  .vad-led {
+    width: 8px;
+    height: 8px;
   }
 
   .timer-display {
-    padding: 0.25rem 0.5rem;
+    padding: 0.15rem 0.4rem;
+    gap: 0.25rem;
+  }
+
+  .timer-label {
+    display: none;
+  }
+
+  .timer-digits {
+    font-size: 0.88rem;
+  }
+
+  .monitor-right {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    flex-shrink: 0;
+  }
+
+  .success-btn {
+    height: 30px;
+    padding: 0 0.45rem;
+    font-size: 0.74rem;
+  }
+
+  .sync-btn {
+    height: 30px;
+    padding: 0 0.45rem;
+    font-size: 0.74rem;
+  }
+
+  #sync-status-text {
+    display: none;
+  }
+
+  .notify-btn-group {
+    display: none;
   }
 
   /* License Gate Screen Optimization */
   .license-gate-screen {
-    padding: 0.65rem;
+    padding: 0.65rem 0.65rem 2.5rem;
     align-items: flex-start;
   }
 
@@ -1462,8 +1571,12 @@ html, body {
     border-radius: 14px;
     gap: 1rem;
     width: 100%;
-    margin-top: 0.5rem;
-    margin-bottom: 2rem;
+    margin: 0 auto;
+    box-shadow: 0 8px 30px var(--shadow-color);
+  }
+
+  .lock-header {
+    gap: 0.4rem;
   }
 
   .lock-title {
@@ -1471,69 +1584,106 @@ html, body {
   }
 
   .lock-subtitle {
-    font-size: 0.8rem;
+    font-size: 0.78rem;
+    line-height: 1.45;
   }
 
   .device-qr-section {
     flex-direction: column;
     align-items: center;
-    padding: 0.9rem 0.65rem;
-    gap: 1rem;
+    padding: 0.85rem 0.65rem;
+    gap: 0.85rem;
+  }
+
+  .qr-canvas-wrapper {
+    margin: 0 auto;
   }
 
   .qr-box {
     width: 130px;
     height: 130px;
+    padding: 6px;
   }
 
   .qr-guide-card {
-    min-width: unset;
+    min-width: 0;
     width: 100%;
+    gap: 0.6rem;
+  }
+
+  .step-guide-list {
+    gap: 0.45rem;
   }
 
   .step-item {
-    padding: 0.45rem 0.6rem;
-    gap: 0.5rem;
+    padding: 0.45rem 0.55rem;
+    gap: 0.45rem;
   }
 
   .step-num {
-    width: 19px;
-    height: 19px;
-    font-size: 0.7rem;
+    width: 18px;
+    height: 18px;
+    font-size: 0.68rem;
+    margin-top: 2px;
   }
 
   .step-text strong {
-    font-size: 0.8rem;
+    font-size: 0.78rem;
   }
 
   .step-text p {
     font-size: 0.72rem;
+    line-height: 1.4;
   }
 
   .uuid-compact-row {
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     padding: 0.35rem 0.5rem;
+    gap: 0.35rem;
+    width: 100%;
+  }
+
+  .uuid-label {
+    font-size: 0.7rem;
+    flex-shrink: 0;
   }
 
   .uuid-text {
-    width: 100%;
-    margin: 2px 0;
+    flex: 1 1 auto;
+    min-width: 0;
+    font-size: 0.72rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  #copy-uuid-btn {
+    flex-shrink: 0;
+    height: 24px;
+    padding: 0 0.4rem;
+    font-size: 0.68rem;
   }
 
   .approval-tabs {
-    flex-direction: column;
+    flex-direction: row;
     gap: 0.35rem;
   }
 
   .approval-tab-btn {
-    padding: 0.45rem;
-    font-size: 0.8rem;
+    flex: 1;
+    padding: 0.45rem 0.25rem;
+    font-size: 0.76rem;
+    text-align: center;
+  }
+
+  .input-label {
+    font-size: 0.78rem;
   }
 
   .pin-text-input {
-    height: 42px;
+    height: 44px;
     font-size: 1.35rem;
-    letter-spacing: 0.15em;
+    letter-spacing: 0.18em;
   }
 
   .pin-submit-row {
@@ -1544,58 +1694,158 @@ html, body {
   .pin-submit-row .ctrl-btn {
     width: 100%;
     height: 42px;
+    font-size: 0.92rem;
+    font-weight: 700;
   }
 
-  /* Score Viewport & Golden Guide Line */
-  .golden-guide-line {
-    top: 28vh;
+  .token-submit-row {
+    flex-direction: column;
+    gap: 0.4rem;
   }
 
+  .token-submit-row .ctrl-btn {
+    width: 100%;
+    height: 38px;
+  }
+
+  .camera-preview-box {
+    max-width: 100%;
+    min-height: 160px;
+  }
+
+  .gate-footer {
+    flex-direction: column;
+    text-align: center;
+    gap: 0.35rem;
+    font-size: 0.78rem;
+    padding-top: 0.75rem;
+  }
+
+  /* Score Viewport */
   .score-wrapper {
-    padding-top: 28vh;
-    padding-bottom: 50vh;
-    padding-left: 0.35rem;
-    padding-right: 0.35rem;
-  }
-
-  .pdf-viewer-wrapper {
-    padding-top: 28vh;
-    padding-bottom: 50vh;
     padding-left: 0.25rem;
     padding-right: 0.25rem;
+    max-width: 100%;
+  }
+
+  #score-container svg {
+    max-width: 100% !important;
+    height: auto !important;
+  }
+
+  /* PDF Viewport */
+  .pdf-viewer-wrapper {
+    padding-left: 0.35rem;
+    padding-right: 0.35rem;
+    max-width: 100%;
+  }
+
+  .pdf-page-slot {
+    min-height: 480px;
+    border-radius: 6px;
   }
 
   /* Modals */
   .modal-card {
     padding: 1.15rem 0.9rem;
     width: 95%;
+    max-width: 95%;
   }
 }
 
-/* 2. Tablet Screen (681px - 1024px) */
-@media screen and (min-width: 681px) and (max-width: 1024px) {
+/* 2. Mobile Phone Landscape (< 900px and landscape and max-height 500px) */
+@media screen and (max-width: 900px) and (orientation: landscape) and (max-height: 500px) {
+  :root {
+    --golden-guide-top: max(85px, 28vh);
+  }
+
   .viewer-header {
-    padding: 0.6rem 1rem;
+    flex-direction: row;
+    padding: 0.3rem 0.75rem;
+    gap: 0.5rem;
+  }
+
+  .header-left {
+    width: auto;
+    flex: 1 1 auto;
+  }
+
+  .toolbar-controls {
+    width: auto;
+    flex: 0 0 auto;
+  }
+
+  .practice-monitor-bar {
+    padding: 0.25rem 0.75rem;
+    min-height: 32px;
+  }
+
+  .score-wrapper,
+  .pdf-viewer-wrapper {
+    padding-bottom: 70vh;
+  }
+
+  .license-gate-card {
+    max-width: 520px;
+    padding: 1rem;
+  }
+}
+
+/* 3. Tablet Screen (681px - 1024px) */
+@media screen and (min-width: 681px) and (max-width: 1024px) {
+  :root {
+    --golden-guide-top: 34vh;
+  }
+
+  .tab-text-short {
+    display: none;
+  }
+  .tab-text-full {
+    display: inline;
+  }
+
+  .viewer-header {
+    padding: 0.6rem 1.25rem;
     gap: 0.75rem;
+    flex-wrap: nowrap;
   }
 
   .header-left {
     gap: 1rem;
+    flex: 1 1 auto;
+    min-width: 0;
   }
 
   .piece-title {
     max-width: 280px;
+    font-size: 0.95rem;
+  }
+
+  .toolbar-controls {
+    gap: 0.6rem;
+    flex-shrink: 0;
   }
 
   .score-wrapper {
-    max-width: 96vw;
+    max-width: 95vw;
     padding-left: 1rem;
     padding-right: 1rem;
+  }
+
+  .pdf-viewer-wrapper {
+    max-width: 95vw;
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  .pdf-page-slot {
+    min-height: 700px;
   }
 
   .device-qr-section {
     flex-direction: row;
     align-items: flex-start;
+    gap: 1.25rem;
   }
 
   .qr-box {
@@ -1605,23 +1855,42 @@ html, body {
 
   .license-gate-card {
     max-width: 580px;
-    padding: 1.6rem;
+    padding: 1.75rem;
   }
 }
 
-/* 3. PC Desktop (> 1024px) */
+/* 4. PC Desktop (> 1024px) */
 @media screen and (min-width: 1025px) {
+  :root {
+    --golden-guide-top: 35vh;
+  }
+
+  .tab-text-short {
+    display: none;
+  }
+  .tab-text-full {
+    display: inline;
+  }
+
   .viewer-header {
-    padding: 0.65rem 1.75rem;
+    padding: 0.75rem 2rem;
   }
 
   .piece-title {
     font-size: 1.05rem;
-    max-width: 450px;
+    max-width: 480px;
   }
 
   .score-wrapper {
     max-width: 1050px;
+  }
+
+  .pdf-viewer-wrapper {
+    max-width: 900px;
+  }
+
+  .pdf-page-slot {
+    min-height: 850px;
   }
 
   .license-gate-card {

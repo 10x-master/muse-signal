@@ -114,9 +114,13 @@
     /* History Table */
     .history-table-wrapper {
       overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      border-radius: 8px;
+      border: 1px solid var(--btn-border);
     }
     .history-table {
       width: 100%;
+      min-width: 620px;
       border-collapse: collapse;
       font-size: 0.85rem;
     }
@@ -127,11 +131,13 @@
       color: var(--text-secondary);
       font-weight: 700;
       border-bottom: 1px solid var(--btn-border);
+      white-space: nowrap;
     }
     .history-table td {
       padding: 0.75rem 0.85rem;
       border-bottom: 1px solid var(--btn-border);
       color: var(--text-primary);
+      white-space: nowrap;
     }
     .pin-badge {
       display: inline-block;

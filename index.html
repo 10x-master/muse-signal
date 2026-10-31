@@ -27,10 +27,14 @@
         <!-- Mode Toggle Tabs -->
         <nav class="mode-tabs" aria-label="악보 모드 선택">
           <button id="tab-musicxml" class="tab-btn active" type="button">
-            <span class="tab-icon">🎵</span> 스마트 MusicXML
+            <span class="tab-icon">🎵</span>
+            <span class="tab-text-full">스마트 MusicXML</span>
+            <span class="tab-text-short">MusicXML</span>
           </button>
           <button id="tab-pdf" class="tab-btn" type="button">
-            <span class="tab-icon">📄</span> 일반 PDF
+            <span class="tab-icon">📄</span>
+            <span class="tab-text-full">일반 PDF</span>
+            <span class="tab-text-short">PDF</span>
           </button>
         </nav>
       </div>
@@ -131,7 +135,7 @@
                 <span class="step-num">1</span>
                 <div class="step-text">
                   <strong>선생님께 화면 보여주기 (또는 캡처 전송)</strong>
-                  <p>• <strong>대면 레슨:</strong> 왼쪽 QR코드를 선생님 스마트폰 카메라로 비춰주세요.</p>
+                  <p>• <strong>대면 레슨:</strong> 화면의 기기 QR코드를 선생님 스마트폰 카메라로 비춰주세요.</p>
                   <p>• <strong>비대면(카톡):</strong> 이 화면을 <strong>캡처</strong>하거나 아래 기기 코드를 복사해서 카톡으로 보내주세요.</p>
                 </div>
               </li>
@@ -146,7 +150,7 @@
                 <span class="step-num">3</span>
                 <div class="step-text">
                   <strong>아래 입력창에 6자리 입력 후 잠금 해제!</strong>
-                  <p>한 번만 인증하면 인터넷이 없는 곳에서도 평생 무료로 악보를 볼 수 있습니다.</p>
+                  <p>한 번만 인증하면 오프라인에서도 평생 무료로 악보를 볼 수 있습니다.</p>
                 </div>
               </li>
             </ol>
@@ -163,10 +167,12 @@
         <div class="approval-input-section">
           <div class="approval-tabs">
             <button id="tab-act-code" class="approval-tab-btn active" type="button">
-              ✉️ 비대면 (6자리 승인 코드)
+              <span class="tab-text-full">✉️ 비대면 (6자리 승인 코드)</span>
+              <span class="tab-text-short">✉️ 6자리 핀코드</span>
             </button>
             <button id="tab-act-qr" class="approval-tab-btn" type="button">
-              📷 대면 (승인 QR 스캔 / 토큰)
+              <span class="tab-text-full">📷 대면 (승인 QR 스캔 / 토큰)</span>
+              <span class="tab-text-short">📷 대면 QR스캔</span>
             </button>
           </div>
 
