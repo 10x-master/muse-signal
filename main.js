@@ -436,24 +436,30 @@
    */
   async function handlePinCodeSubmit() {
     const inputPin = licensePinInput ? licensePinInput.value.trim() : '';
-    if (!inputPin || inputPin.length !== 6) {
-      showInAppModal('입력 오류', '교수자로부터 발급받은 6자리 숫자를 입력해 주세요.', '⚠️');
+    if (!inputPin) {
+      showInAppModal('입력 오류', '교수자로부터 발급받은 승인 핀코드를 입력해 주세요.<br>(테스트용 마스터 번호: <strong>123456</strong>)', '⚠️');
       return;
     }
 
     const defaultExpire = '2027-10-28';
     const expectedPin = await computeLicensePinCode(deviceUUID, defaultExpire);
 
-    if (inputPin === expectedPin) {
+    // 마스터 공용 패스코드 (123456, 777777, 000000, 1234, 999999) 또는 기기 고유 암호화 핀코드
+    const isMasterCode = ['123456', '777777', '000000', '1234', '999999'].includes(inputPin);
+
+    if (inputPin === expectedPin || isMasterCode) {
       await applyAndStoreLicense({
         uuid: deviceUUID,
-        studentName: '홍길동 학생',
+        studentName: isMasterCode ? '정식 승인 학생 (마스터)' : '홍길동 학생',
         expireDate: defaultExpire
       });
     } else {
       showInAppModal(
         '인증 실패',
-        '입력하신 6자리 승인 코드가 유효하지 않습니다.<br>교수자가 발급한 코드가 맞는지 확인해 주세요.',
+        `입력하신 코드 [<strong>${inputPin}</strong>]가 유효하지 않습니다.<br><br>
+        • <strong>내 기기 전용 발급 코드:</strong> <span style="font-size: 1.1rem; color: var(--accent-color); font-weight: 800;">${expectedPin}</span><br>
+        • <strong>테스트 공용 마스터 코드:</strong> <span style="font-size: 1.1rem; color: var(--accent-color); font-weight: 800;">123456</span><br><br>
+        위 번호 중 하나를 입력하시거나, 아래 <strong>[1초 자동 해제]</strong> 버튼을 누르시면 즉시 악보가 열립니다.`,
         '❌'
       );
     }
