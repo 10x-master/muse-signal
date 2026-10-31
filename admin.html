@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="ko" data-theme="day">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>교수자 전용 라이선스 관리 콘솔 - Muse Signal</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+  <style>
+    .admin-container {
+      max-width: 900px;
+      margin: 2rem auto;
+      padding: 0 1.5rem 3rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+    .admin-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1.25rem 1.5rem;
+      background: var(--card-bg);
+      border: 1px solid var(--btn-border);
+      border-radius: 16px;
+      box-shadow: 0 4px 16px var(--shadow-color);
+    }
+    .admin-header-title {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .admin-badge {
+      font-size: 0.72rem;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      color: var(--accent-color);
+      text-transform: uppercase;
+    }
+    .admin-title {
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+    .admin-card {
+      background: var(--card-bg);
+      border: 1px solid var(--btn-border);
+      border-radius: 16px;
+      padding: 1.75rem;
+      box-shadow: 0 4px 20px var(--shadow-color);
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+    .card-heading {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      border-bottom: 1px solid var(--btn-border);
+      padding-bottom: 0.75rem;
+    }
+    /* Login Lock Screen */
+    .login-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 2000;
+      background: var(--bg-color);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+      backdrop-filter: blur(15px);
+    }
+    .login-card {
+      width: 100%;
+      max-width: 420px;
+      background: var(--card-bg);
+      border: 1px solid var(--btn-border);
+      border-radius: 20px;
+      padding: 2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+      box-shadow: 0 16px 40px var(--shadow-color);
+      text-align: center;
+    }
+    .login-icon {
+      font-size: 2.5rem;
+      margin-bottom: -0.5rem;
+    }
+    .login-pw-input {
+      height: 48px;
+      padding: 0 1rem;
+      font-size: 1.2rem;
+      letter-spacing: 0.2em;
+      text-align: center;
+      border-radius: 10px;
+      border: 2px solid var(--btn-border);
+      background: var(--btn-bg);
+      color: var(--text-primary);
+      outline: none;
+    }
+    .login-pw-input:focus {
+      border-color: var(--accent-color);
+    }
+    .login-hint {
+      font-size: 0.78rem;
+      color: var(--text-secondary);
+    }
+    /* History Table */
+    .history-table-wrapper {
+      overflow-x: auto;
+    }
+    .history-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.85rem;
+    }
+    .history-table th {
+      text-align: left;
+      padding: 0.65rem 0.85rem;
+      background: var(--btn-bg);
+      color: var(--text-secondary);
+      font-weight: 700;
+      border-bottom: 1px solid var(--btn-border);
+    }
+    .history-table td {
+      padding: 0.75rem 0.85rem;
+      border-bottom: 1px solid var(--btn-border);
+      color: var(--text-primary);
+    }
+    .pin-badge {
+      display: inline-block;
+      font-family: ui-monospace, "SF Mono", monospace;
+      font-size: 1.15rem;
+      font-weight: 800;
+      letter-spacing: 0.1em;
+      color: var(--accent-color);
+      background: var(--btn-bg);
+      padding: 0.2rem 0.6rem;
+      border-radius: 6px;
+      border: 1px solid var(--btn-border);
+    }
+    .kakao-btn {
+      background: #FEE500;
+      color: #191919;
+      font-weight: 700;
+      border: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.6rem 1.2rem;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    .kakao-btn:hover {
+      background: #E6CF00;
+    }
+  </style>
+</head>
+<body>
+  <!-- [보안 게이트] 교수자 마스터 비밀번호 인증 창 -->
+  <div id="admin-login-overlay" class="login-overlay">
+    <div class="login-card">
+      <div class="login-icon">👨‍🏫</div>
+      <h2 style="font-size: 1.4rem; font-weight: 700; color: var(--text-primary);">교수자 관리 콘솔 로그인</h2>
+      <p style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.5;">
+        학생용 6자리 라이선스 키를 발급하려면<br>교수자 마스터 비밀번호를 입력하세요.
+      </p>
+      <input type="password" id="admin-pw-input" class="login-pw-input" placeholder="비밀번호 입력" autofocus>
+      <button id="admin-login-btn" class="ctrl-btn primary" style="height: 46px; font-size: 1rem; font-weight: 700;" type="button">
+        로그인 및 콘솔 진입
+      </button>
+      <p class="login-hint">초기 비밀번호: <strong>1234</strong> (로그인 후 즉시 변경 가능)</p>
+      <div style="margin-top: 0.5rem;">
+        <a href="index.html" style="font-size: 0.82rem; color: var(--accent-color); text-decoration: underline;">← 학생 악보 뷰어로 돌아가기</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- 메인 관리자 대시보드 -->
+  <div class="admin-container">
+    <header class="admin-header">
+      <div class="admin-header-title">
+        <span class="admin-badge">Muse Signal Professor Console</span>
+        <h1 class="admin-title">👨‍🏫 교수자 라이선스 발급 & 기기 관리 센터</h1>
+      </div>
+      <div style="display: flex; align-items: center; gap: 0.6rem;">
+        <a href="index.html" class="ctrl-btn sm-btn" style="text-decoration: none; display: inline-flex; align-items: center;">
+          🎵 학생 뷰어 열기
+        </a>
+        <button id="admin-logout-btn" class="ctrl-btn sm-btn" type="button">
+          로그아웃
+        </button>
+      </div>
+    </header>
+
+    <!-- 발급기 카드 -->
+    <section class="admin-card">
+      <h2 class="card-heading">🔑 신규 학생 라이선스 (6자리 핀코드) 발급</h2>
+      <p style="font-size: 0.88rem; color: var(--text-secondary); line-height: 1.5;">
+        학생이 카톡으로 보낸 <strong>태블릿 기기 UUID</strong>를 입력하고 발급 버튼을 누르면 <strong>6자리 승인번호</strong>가 즉시 생성됩니다.
+      </p>
+
+      <div class="prof-form-group">
+        <label class="prof-label">학생 기기 UUID (학생 화면에 표시된 코드)</label>
+        <div class="input-action-row">
+          <input type="text" id="target-uuid" class="prof-input" placeholder="예: 792b5756-3b3b-4177-8fa7-df4579cb2066">
+          <button id="camera-scan-btn" class="ctrl-btn sm-btn" type="button">📷 학생 QR 스캔</button>
+        </div>
+      </div>
+
+      <!-- 카메라 스캔 박스 -->
+      <div id="camera-box-wrapper" class="hidden" style="margin-bottom: 0.5rem;">
+        <div id="admin-qr-reader" style="width: 100%; max-width: 320px; margin: 0 auto; border-radius: 10px; overflow: hidden;"></div>
+        <div style="text-align: center; margin-top: 0.4rem;">
+          <button id="stop-scan-btn" class="ctrl-btn sm-btn" type="button">스캐너 닫기</button>
+        </div>
+      </div>
+
+      <div class="prof-form-row">
+        <div class="prof-form-group">
+          <label class="prof-label">학생 성명</label>
+          <input type="text" id="student-name" class="prof-input" value="홍길동">
+        </div>
+        <div class="prof-form-group">
+          <label class="prof-label">유효 기간 (기본 1년)</label>
+          <input type="date" id="expire-date" class="prof-input" value="2027-10-28">
+        </div>
+      </div>
+
+      <button id="btn-issue" class="ctrl-btn primary full-width" type="button" style="height: 48px; font-size: 1.05rem;">
+        🔑 6자리 승인 핀코드 즉시 발급하기
+      </button>
+
+      <!-- 발급 결과 박스 -->
+      <div id="issue-result" class="prof-result-section hidden">
+        <div class="result-badge-row">
+          <span class="success-badge">✅ 라이선스 발급 완료 (HMAC-SHA256 디지털 서명됨)</span>
+        </div>
+
+        <div class="result-card pin-card" style="background: rgba(230, 167, 86, 0.08); border-color: var(--accent-color);">
+          <div class="result-card-header">
+            <span class="card-tag">카톡 전송용</span>
+            <span class="card-title">학생에게 전달할 6자리 승인번호</span>
+          </div>
+          <div class="pin-display-row">
+            <span class="pin-large-code" id="display-pin">------</span>
+            <button id="btn-copy-pin" class="ctrl-btn sm-btn" type="button">번호만 복사</button>
+          </div>
+          <div style="display: flex; gap: 0.5rem; margin-top: 0.5rem; flex-wrap: wrap;">
+            <button id="btn-copy-kakao" class="kakao-btn" type="button">
+              💬 카톡 전송용 전체 안내문 복사
+            </button>
+          </div>
+        </div>
+
+        <div class="result-card qr-card">
+          <div class="result-card-header">
+            <span class="card-tag">대면 레슨용</span>
+            <span class="card-title">승인 QR코드 (학생 태블릿 카메라로 비추기)</span>
+          </div>
+          <div class="prof-qr-wrapper">
+            <div id="admin-approved-qr" class="prof-qr-box"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 발급 내역 관리 테이블 -->
+    <section class="admin-card">
+      <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--btn-border); padding-bottom: 0.75rem;">
+        <h2 class="card-heading" style="border: none; padding: 0; margin: 0;">📋 발급 내역 히스토리</h2>
+        <button id="btn-clear-history" class="ctrl-btn sm-btn" type="button" style="color: #EF4444;">내역 초기화</button>
+      </div>
+
+      <div class="history-table-wrapper">
+        <table class="history-table">
+          <thead>
+            <tr>
+              <th>발급 일시</th>
+              <th>학생 성명</th>
+              <th>기기 UUID</th>
+              <th>유효기간</th>
+              <th>6자리 핀코드</th>
+              <th>재전송</th>
+            </tr>
+          </thead>
+          <tbody id="history-tbody">
+            <tr>
+              <td colspan="6" style="text-align: center; color: var(--text-secondary); padding: 2rem;">
+                아직 발급된 라이선스 내역이 없습니다.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    (function () {
+      'use strict';
+      const PROFESSOR_MASTER_SEED = "MUSE_SIGNAL_PROFESSOR_MASTER_SECRET_KEY_2026";
+      let adminPw = localStorage.getItem('muse_admin_pw') || '1234';
+
+      const loginOverlay = document.getElementById('admin-login-overlay');
+      const pwInput = document.getElementById('admin-pw-input');
+      const loginBtn = document.getElementById('admin-login-btn');
+      const logoutBtn = document.getElementById('admin-logout-btn');
+
+      const targetUuidInput = document.getElementById('target-uuid');
+      const studentNameInput = document.getElementById('student-name');
+      const expireDateInput = document.getElementById('expire-date');
+      const btnIssue = document.getElementById('btn-issue');
+      const issueResult = document.getElementById('issue-result');
+      const displayPin = document.getElementById('display-pin');
+      const btnCopyPin = document.getElementById('btn-copy-pin');
+      const btnCopyKakao = document.getElementById('btn-copy-kakao');
+      const approvedQrEl = document.getElementById('admin-approved-qr');
+      const historyTbody = document.getElementById('history-tbody');
+      const btnClearHistory = document.getElementById('btn-clear-history');
+
+      let currentIssuedRecord = null;
+      let html5QrScanner = null;
+
+      // 로그인 체크
+      if (sessionStorage.getItem('muse_admin_logged_in') === 'true') {
+        loginOverlay.classList.add('hidden');
+      }
+
+      loginBtn.addEventListener('click', performLogin);
+      pwInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') performLogin();
+      });
+
+      function performLogin() {
+        if (pwInput.value.trim() === adminPw) {
+          sessionStorage.setItem('muse_admin_logged_in', 'true');
+          loginOverlay.classList.add('hidden');
+          loadHistory();
+        } else {
+          alert('비밀번호가 올바르지 않습니다.');
+          pwInput.value = '';
+          pwInput.focus();
+        }
+      }
+
+      logoutBtn.addEventListener('click', () => {
+        sessionStorage.removeItem('muse_admin_logged_in');
+        location.reload();
+      });
+
+      // 6자리 핀코드 계산 함수
+      async function computePin(uuid, expireDate) {
+        const enc = new TextEncoder();
+        const keyMaterial = await window.crypto.subtle.importKey(
+          'raw',
+          enc.encode(PROFESSOR_MASTER_SEED),
+          { name: 'HMAC', hash: 'SHA-256' },
+          false,
+          ['sign']
+        );
+        const message = `${uuid.trim()}::${expireDate.trim()}`;
+        const sigBuffer = await window.crypto.subtle.sign('HMAC', keyMaterial, enc.encode(message));
+        const bytes = new Uint8Array(sigBuffer);
+        const num = ((bytes[0] << 24) | (bytes[1] << 16) | (bytes[2] << 8) | bytes[3]) >>> 0;
+        return String(num % 1000000).padStart(6, '0');
+      }
+
+      async function generateFullToken(uuid, studentName, expireDate) {
+        const payload = {
+          app: 'MuseSignal',
+          uuid: uuid.trim(),
+          studentName: studentName.trim(),
+          expireDate: expireDate.trim(),
+          issuedAt: new Date().toISOString()
+        };
+        const payloadJson = JSON.stringify(payload);
+        const enc = new TextEncoder();
+        const keyMaterial = await window.crypto.subtle.importKey(
+          'raw',
+          enc.encode(PROFESSOR_MASTER_SEED),
+          { name: 'HMAC', hash: 'SHA-256' },
+          false,
+          ['sign']
+        );
+        const sigBuffer = await window.crypto.subtle.sign('HMAC', keyMaterial, enc.encode(payloadJson));
+        const sigHex = Array.from(new Uint8Array(sigBuffer))
+          .map((b) => b.toString(16).padStart(2, '0'))
+          .join('');
+        const encodedPayload = btoa(unescape(encodeURIComponent(payloadJson)));
+        return `${encodedPayload}.${sigHex}`;
+      }
+
+      // 발급 버튼 클릭
+      btnIssue.addEventListener('click', async () => {
+        const uuid = targetUuidInput.value.trim();
+        const student = studentNameInput.value.trim() || '홍길동';
+        const expire = expireDateInput.value.trim() || '2027-10-28';
+
+        if (!uuid) {
+          alert('학생 기기 UUID를 입력하세요!');
+          targetUuidInput.focus();
+          return;
+        }
+
+        const pin = await computePin(uuid, expire);
+        const fullToken = await generateFullToken(uuid, student, expire);
+
+        displayPin.textContent = pin;
+        issueResult.classList.remove('hidden');
+
+        // 승인 QR 생성
+        approvedQrEl.innerHTML = '';
+        if (window.QRCode) {
+          new QRCode(approvedQrEl, {
+            text: fullToken,
+            width: 140,
+            height: 140,
+            colorDark: '#1A1A1A',
+            colorLight: '#FFFFFF',
+            correctLevel: QRCode.CorrectLevel.L
+          });
+        }
+
+        currentIssuedRecord = {
+          id: 'lic_' + Date.now(),
+          issuedAt: new Date().toLocaleString(),
+          student,
+          uuid,
+          expire,
+          pin
+        };
+
+        saveToHistory(currentIssuedRecord);
+      });
+
+      // 복사 버튼
+      btnCopyPin.addEventListener('click', () => {
+        if (!currentIssuedRecord) return;
+        navigator.clipboard.writeText(currentIssuedRecord.pin);
+        btnCopyPin.textContent = '복사됨!';
+        setTimeout(() => (btnCopyPin.textContent = '번호만 복사'), 1500);
+      });
+
+      btnCopyKakao.addEventListener('click', () => {
+        if (!currentIssuedRecord) return;
+        const msg = `[뮤즈 시그널 악보 뷰어 기기 승인 안내]\n안녕하세요 ${currentIssuedRecord.student} 학생,\n태블릿 라이선스 승인이 완료되었습니다.\n\n▶ 6자리 승인번호: [ ${currentIssuedRecord.pin} ]\n▶ 유효기간: ${currentIssuedRecord.expire}까지\n\n악보 앱 화면 하단의 핀코드 입력란에 위 6자리 번호를 넣고 [인증 및 잠금 해제]를 누르면 즉시 악보를 볼 수 있습니다.`;
+        navigator.clipboard.writeText(msg);
+        btnCopyKakao.textContent = '카톡 안내문 복사 완료!';
+        setTimeout(() => (btnCopyKakao.textContent = '💬 카톡 전송용 전체 안내문 복사'), 2000);
+      });
+
+      // 히스토리 관리
+      function saveToHistory(record) {
+        const list = JSON.parse(localStorage.getItem('muse_admin_history') || '[]');
+        list.unshift(record);
+        localStorage.setItem('muse_admin_history', JSON.stringify(list));
+        loadHistory();
+      }
+
+      function loadHistory() {
+        const list = JSON.parse(localStorage.getItem('muse_admin_history') || '[]');
+        if (list.length === 0) {
+          historyTbody.innerHTML = `
+            <tr>
+              <td colspan="6" style="text-align: center; color: var(--text-secondary); padding: 2rem;">
+                아직 발급된 라이선스 내역이 없습니다.
+              </td>
+            </tr>
+          `;
+          return;
+        }
+
+        historyTbody.innerHTML = list.map((item) => `
+          <tr>
+            <td>${item.issuedAt}</td>
+            <td><strong>${item.student}</strong></td>
+            <td><code style="font-size:0.75rem;">${item.uuid.substring(0, 8)}...</code></td>
+            <td>${item.expire}</td>
+            <td><span class="pin-badge">${item.pin}</span></td>
+            <td>
+              <button class="ctrl-btn sm-btn" onclick="navigator.clipboard.writeText('${item.pin}'); alert('${item.student} 학생 핀 [${item.pin}] 복사 완료!');">
+                핀 복사
+              </button>
+            </td>
+          </tr>
+        `).join('');
+      }
+
+      btnClearHistory.addEventListener('click', () => {
+        if (confirm('발급 히스토리를 모두 삭제하시겠습니까?')) {
+          localStorage.removeItem('muse_admin_history');
+          loadHistory();
+        }
+      });
+
+      // 카메라 스캔 연동
+      const cameraScanBtn = document.getElementById('camera-scan-btn');
+      const cameraBoxWrapper = document.getElementById('camera-box-wrapper');
+      const stopScanBtn = document.getElementById('stop-scan-btn');
+
+      cameraScanBtn.addEventListener('click', () => {
+        cameraBoxWrapper.classList.remove('hidden');
+        if (!html5QrScanner) {
+          html5QrScanner = new Html5Qrcode('admin-qr-reader');
+        }
+        html5QrScanner.start(
+          { facingMode: 'environment' },
+          { fps: 10, qrbox: { width: 200, height: 200 } },
+          (decoded) => {
+            html5QrScanner.stop();
+            cameraBoxWrapper.classList.add('hidden');
+            try {
+              const data = JSON.parse(decoded);
+              if (data.uuid) targetUuidInput.value = data.uuid;
+              else targetUuidInput.value = decoded;
+            } catch (e) {
+              targetUuidInput.value = decoded;
+            }
+          },
+          () => {}
+        );
+      });
+
+      stopScanBtn.addEventListener('click', () => {
+        if (html5QrScanner) html5QrScanner.stop();
+        cameraBoxWrapper.classList.add('hidden');
+      });
+
+      loadHistory();
+    })();
+  </script>
+</body>
+</html>
